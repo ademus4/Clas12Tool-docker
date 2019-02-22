@@ -9,7 +9,7 @@ ENV DISPLAY localhost:0.0
 ENV ROOTSYS /usr/local/bin/root
 
 # install general software
-RUN yum install -y pico
+RUN yum install -y nano
 
 # set clas12tool variables
 ENV CLAS12TOOL /work/Clas12Tool/
