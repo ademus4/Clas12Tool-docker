@@ -25,3 +25,7 @@ ADD environment.sh .bashrc
 
 # make sure the work directory can be modified by any user
 RUN chmod -R 777 /work
+
+# run the commands to precompile (for speed)
+RUN root -l $CLAS12TOOL/RunRoot/importToROOT.C
+RUN root -l $CLAS12TOOL/RunRoot/hiporoot/LoadHipoROOT.C
