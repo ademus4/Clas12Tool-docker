@@ -4,15 +4,29 @@ WORKDIR /work
 ENV HOME /work
 
 # set environment variables
-## root
-ENV DISPLAY localhost:0.0
 ENV ROOTSYS /usr/local/bin/root
+ENV CLAS12TOOL /work/Clas12Tool/
+ENV DISPLAY=:0.0 \
+    DISPLAY_WIDTH=1024 \
+    DISPLAY_HEIGHT=768 \
+    RUN_XTERM=yes \
+    RUN_FLUXBOX=yes
+
+# open vnc port
+EXPOSE 8080
 
 # install general software
 RUN yum install -y nano
 
-# set clas12tool variables
-ENV CLAS12TOOL /work/Clas12Tool/
+# install requirements for novnc server
+RUN yum install -y fluxbox \
+    novnc \
+    x11vnc \
+    xterm \
+    xvfb \
+    socat \
+    supervisor \
+    net-tools
 
 # HIPO
 RUN git clone --recurse-submodules https://github.com/dglazier/Clas12Tool.git \
@@ -21,11 +35,20 @@ RUN git clone --recurse-submodules https://github.com/dglazier/Clas12Tool.git \
 RUN cd Clas12Tool/Lz4 && make
 
 # general environment variables
-ADD environment.sh .bashrc
+COPY environment.sh .
 
 # make sure the work directory can be modified by any user
 RUN chmod -R 777 /work
 
+# set some aliases for clas12tools
+ENV clas12reader "root -l $CLAS12TOOL/RunRoot/importToROOT.C"
+ENV hipodraw "root -l $CLAS12TOOL/RunRoot/hiporoot/LoadHipoROOT.C"
+
+
 # run the commands to precompile (for speed)
 RUN root -l $CLAS12TOOL/RunRoot/importToROOT.C
 RUN root -l $CLAS12TOOL/RunRoot/hiporoot/LoadHipoROOT.C
+
+# run novnc server
+COPY . /app
+CMD ["/app/entrypoint.sh"]
